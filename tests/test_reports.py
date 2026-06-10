@@ -1,3 +1,5 @@
+import pytest
+
 from .conftest import auth_header
 from .test_game import _answer, _correct_choice, _start
 
@@ -17,7 +19,7 @@ def test_overview(client):
     res = client.get("/api/v1/reports/overview", headers=headers)
     data = res.get_json()
     assert data["sessions_finished"] == 1
-    assert data["overall_accuracy"] == 1.0
+    assert data["overall_accuracy"] == pytest.approx(1.0)
     assert data["guards_active"] == 2
     assert data["questions_in_bank"] == 6
 
@@ -29,7 +31,7 @@ def test_users_report_and_detail(client):
     rows = client.get("/api/v1/reports/users", headers=headers).get_json()["items"]
     top = rows[0]
     assert top["email"] == "guarda@test.co"
-    assert top["accuracy"] == 1.0
+    assert top["accuracy"] == pytest.approx(1.0)
     assert top["sessions_finished"] == 1
 
     detail = client.get(f"/api/v1/reports/users/{top['id']}",

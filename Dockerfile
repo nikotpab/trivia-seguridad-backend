@@ -10,10 +10,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ app/
 COPY wsgi.py gunicorn.conf.py docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
 
-# Usuario no-root
-RUN useradd --create-home appuser && chown -R appuser /srv/app
+# Permisos del entrypoint y usuario no-root
+RUN chmod +x docker-entrypoint.sh \
+    && useradd --create-home appuser \
+    && chown -R appuser /srv/app
 USER appuser
 
 EXPOSE 8000

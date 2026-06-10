@@ -1,4 +1,6 @@
 """Flujo completo del quiz: la opción correcta del seed siempre es 'Opción 1'."""
+import pytest
+
 from .conftest import auth_header
 
 
@@ -49,7 +51,7 @@ def test_full_game_correct_answers(client):
     summary = data["summary"]
     assert summary["session"]["status"] == "finished"
     assert summary["session"]["correct_count"] == 6
-    assert summary["accuracy"] == 1.0
+    assert summary["accuracy"] == pytest.approx(1.0)
     # racha completa de 6 -> insignias
     codes = {b["code"] for b in summary["new_badges"]}
     assert {"primera_mision", "perfeccionista", "racha_de_5"} <= codes

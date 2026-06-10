@@ -8,6 +8,8 @@ from ..models.user import ROLES
 
 bp = Blueprint("users", __name__)
 
+USER_NOT_FOUND = "Usuario no encontrado"
+
 
 @bp.get("")
 @require_auth("admin")
@@ -56,7 +58,7 @@ def create_user():
 def get_user(user_id: int):
     user = db.session.get(User, user_id)
     if not user:
-        return jsonify(error="Usuario no encontrado"), 404
+        return jsonify(error=USER_NOT_FOUND), 404
     return jsonify(user=user.to_dict(include_stats=True))
 
 
@@ -65,7 +67,7 @@ def get_user(user_id: int):
 def update_user(user_id: int):
     user = db.session.get(User, user_id)
     if not user:
-        return jsonify(error="Usuario no encontrado"), 404
+        return jsonify(error=USER_NOT_FOUND), 404
 
     data = request.get_json(silent=True) or {}
     if "full_name" in data:
@@ -89,7 +91,7 @@ def deactivate_user(user_id: int):
     los datos se retienen según la política de tratamiento de la empresa)."""
     user = db.session.get(User, user_id)
     if not user:
-        return jsonify(error="Usuario no encontrado"), 404
+        return jsonify(error=USER_NOT_FOUND), 404
     if user.id == g.current_user.id:
         return jsonify(error="No puedes desactivar tu propia cuenta"), 422
     user.is_active = False

@@ -43,7 +43,7 @@ def rank_info(total_points: int) -> dict:
     for rank in RANKS:
         if total_points >= rank["threshold"]:
             current = rank
-        elif next_rank is None:
+        else:
             next_rank = rank
             break
     progress = 1.0

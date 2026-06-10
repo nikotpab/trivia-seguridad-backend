@@ -5,7 +5,7 @@ from flask import Blueprint, g, jsonify, request
 
 from ..auth.decorators import require_auth
 from ..extensions import db
-from ..models import Badge, GameSession, SessionAnswer, User, UserBadge, RANKS
+from ..models import Badge, GameSession, SessionAnswer, User, RANKS
 from ..services.gamification_service import rank_info
 
 bp = Blueprint("gamification", __name__)

@@ -1,3 +1,5 @@
+import secrets
+
 from .conftest import auth_header, login
 
 
@@ -13,8 +15,9 @@ def test_login_ok(client):
 
 
 def test_login_bad_password(client):
+    wrong_password = "no-" + secrets.token_urlsafe(6)
     res = client.post("/api/v1/auth/login",
-                      json={"email": "guarda@test.co", "password": "mala"})
+                      json={"email": "guarda@test.co", "password": wrong_password})
     assert res.status_code == 401
 
 
