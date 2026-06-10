@@ -1,11 +1,23 @@
+# Python
 __pycache__/
 *.pyc
-.env
-*.db
 .venv/
 venv/
 .pytest_cache/
 .coverage
 htmlcov/
 instance/
+*.db
+
+# Entorno
+.env
+.env.local
+
+# Node (frontend/tooling)
+node_modules/
+dist/
+build/
+
+# Otros
+*.log
 .DS_Store

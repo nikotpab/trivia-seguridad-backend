@@ -94,3 +94,10 @@ Los secrets requeridos están documentados en el propio workflow.
 En producción configurar: `AUTH_MODE=cognito`, `DATABASE_URL` (Postgres),
 `SECRET_KEY`/`JWT_SECRET` desde Secrets Manager, y `CORS_ORIGINS` con el
 dominio real del frontend.
+
+## Tickets relacionados
+
+- [GP-13](https://froidbj.atlassian.net/browse/GP-13) — Diseño del modelo de datos (perfiles)
+- [GP-16](https://froidbj.atlassian.net/browse/GP-16) — Control de acceso RBAC
+- [GP-20](https://froidbj.atlassian.net/browse/GP-20) — Carga secuencial de preguntas
+- [GP-30](https://froidbj.atlassian.net/browse/GP-30) — Motor de puntajes
