@@ -1,0 +1,58 @@
+# CI/CD: test en cada push/PR; build → ECR → ECS solo en main.
+#
+# Secrets requeridos en GitHub (Settings → Secrets and variables → Actions):
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY  (o mejor: OIDC role)
+#   AWS_REGION            ej. us-east-1
+#   ECR_REPOSITORY        ej. trivia-seguridad-backend
+#   ECS_CLUSTER           ej. trivia-seguridad-cluster
+#   ECS_SERVICE           ej. trivia-seguridad-api
+name: backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -q --cov=app --cov-report=term-missing
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          REPO: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          docker build -t $REGISTRY/$REPO:${{ github.sha }} -t $REGISTRY/$REPO:latest .
+          docker push $REGISTRY/$REPO:${{ github.sha }}
+          docker push $REGISTRY/$REPO:latest
+
+      - name: Force new ECS deployment
+        run: |
+          aws ecs update-service \
+            --cluster ${{ secrets.ECS_CLUSTER }} \
+            --service ${{ secrets.ECS_SERVICE }} \
+            --force-new-deployment
