@@ -13,6 +13,7 @@ from ..models.question import DIFFICULTY_POINTS
 bp = Blueprint("questions", __name__)
 
 DIFFICULTIES = tuple(DIFFICULTY_POINTS.keys())
+QUESTION_NOT_FOUND = "Pregunta no encontrada"
 
 
 def _validate_payload(data: dict) -> str | None:
@@ -100,7 +101,7 @@ def import_questions():
 def get_question(question_id: int):
     question = db.session.get(Question, question_id)
     if not question:
-        return jsonify(error="Pregunta no encontrada"), 404
+        return jsonify(error=QUESTION_NOT_FOUND), 404
     return jsonify(question=question.to_dict(include_answers=True))
 
 
@@ -109,7 +110,7 @@ def get_question(question_id: int):
 def update_question(question_id: int):
     question = db.session.get(Question, question_id)
     if not question:
-        return jsonify(error="Pregunta no encontrada"), 404
+        return jsonify(error=QUESTION_NOT_FOUND), 404
 
     data = request.get_json(silent=True) or {}
     if "text" in data:
@@ -140,7 +141,7 @@ def deactivate_question(question_id: int):
     """Borrado lógico: las partidas históricas conservan su referencia."""
     question = db.session.get(Question, question_id)
     if not question:
-        return jsonify(error="Pregunta no encontrada"), 404
+        return jsonify(error=QUESTION_NOT_FOUND), 404
     question.is_active = False
     db.session.commit()
     return jsonify(message="Pregunta desactivada")

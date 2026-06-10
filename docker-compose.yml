@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: trivia
-      POSTGRES_PASSWORD: trivia
-      POSTGRES_DB: trivia
+      POSTGRES_USER: ${POSTGRES_USER:-trivia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en tu .env}
+      POSTGRES_DB: ${POSTGRES_DB:-trivia}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U trivia"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trivia}"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -18,7 +18,7 @@ services:
   api:
     build: .
     environment:
-      DATABASE_URL: postgresql+psycopg2://trivia:trivia@db:5432/trivia
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-trivia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-trivia}
       AUTH_MODE: local
       SECRET_KEY: ${SECRET_KEY:-solo-desarrollo-local}
       JWT_SECRET: ${JWT_SECRET:-solo-desarrollo-local}
