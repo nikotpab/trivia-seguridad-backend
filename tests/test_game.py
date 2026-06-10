@@ -146,5 +146,5 @@ def test_abandon_and_restart(client):
 
 def test_cannot_access_foreign_session(client):
     sid = _start(client, auth_header(client))["session"]["id"]
-    other = auth_header(client, "guarda2@test.co", "Guarda123*")
+    other = auth_header(client, "guarda2@test.co")
     assert client.get(f"/api/v1/game/sessions/{sid}", headers=other).status_code == 404

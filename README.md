@@ -30,11 +30,11 @@ python wsgi.py          # http://localhost:8000
 
 ### Usuarios de ejemplo (seed)
 
-| Email | Password | Rol |
-|---|---|---|
-| admin@seguridaddeoro.co | `Admin123*` | admin |
-| supervisor@seguridaddeoro.co | `Super123*` | supervisor |
-| guarda1@seguridaddeoro.co | `Guarda123*` | guarda |
+El seed crea `admin@seguridaddeoro.co`, `supervisor@seguridaddeoro.co` y
+`guarda1..3@seguridaddeoro.co`. La contraseña compartida se toma de la
+variable `SEED_DEFAULT_PASSWORD`; si no está definida, se genera una
+aleatoria y se imprime una sola vez en la salida del seed (en Docker:
+`docker compose logs api | grep Contraseña`). No hay credenciales en el código.
 
 ## Autenticación
 

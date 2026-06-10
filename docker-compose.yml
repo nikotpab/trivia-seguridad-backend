@@ -20,9 +20,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg2://trivia:trivia@db:5432/trivia
       AUTH_MODE: local
-      SECRET_KEY: dev-secret-cambiar
-      JWT_SECRET: dev-jwt-cambiar
+      SECRET_KEY: ${SECRET_KEY:-solo-desarrollo-local}
+      JWT_SECRET: ${JWT_SECRET:-solo-desarrollo-local}
       SEED_ON_START: "1"
+      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-}
       CORS_ORIGINS: "*"
     ports:
       - "8000:8000"

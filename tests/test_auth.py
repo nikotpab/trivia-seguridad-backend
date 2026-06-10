@@ -8,7 +8,7 @@ def test_health(client):
 
 
 def test_login_ok(client):
-    token = login(client, "guarda@test.co", "Guarda123*")
+    token = login(client, "guarda@test.co")
     assert token
 
 
@@ -48,12 +48,12 @@ def test_guarda_cannot_see_reports(client):
 
 
 def test_supervisor_cannot_manage_questions(client):
-    headers = auth_header(client, "super@test.co", "Super123*")
+    headers = auth_header(client, "super@test.co")
     assert client.get("/api/v1/questions", headers=headers).status_code == 403
 
 
 def test_admin_can_do_everything(client):
-    headers = auth_header(client, "admin@test.co", "Admin123*")
+    headers = auth_header(client, "admin@test.co")
     assert client.get("/api/v1/users", headers=headers).status_code == 200
     assert client.get("/api/v1/questions", headers=headers).status_code == 200
     assert client.get("/api/v1/reports/overview", headers=headers).status_code == 200

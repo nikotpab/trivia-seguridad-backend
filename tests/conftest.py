@@ -1,3 +1,5 @@
+import secrets
+
 import pytest
 
 from app import create_app
@@ -5,6 +7,9 @@ from app.config import TestConfig
 from app.extensions import db
 from app.models import Badge, Choice, Question, Topic, User
 from app.services.gamification_service import BADGE_CATALOG
+
+# Generada en runtime: ningún secreto hardcodeado en el repositorio
+TEST_PASSWORD = "pw-" + secrets.token_urlsafe(9)
 
 
 @pytest.fixture()
@@ -25,14 +30,14 @@ def client(app):
 
 def _seed_minimal():
     users = [
-        ("admin@test.co", "Admin Test", "admin", "Admin123*"),
-        ("super@test.co", "Super Test", "supervisor", "Super123*"),
-        ("guarda@test.co", "Guarda Test", "guarda", "Guarda123*"),
-        ("guarda2@test.co", "Guarda Dos", "guarda", "Guarda123*"),
+        ("admin@test.co", "Admin Test", "admin"),
+        ("super@test.co", "Super Test", "supervisor"),
+        ("guarda@test.co", "Guarda Test", "guarda"),
+        ("guarda2@test.co", "Guarda Dos", "guarda"),
     ]
-    for email, name, role, password in users:
+    for email, name, role in users:
         user = User(email=email, full_name=name, role=role)
-        user.set_password(password)
+        user.set_password(TEST_PASSWORD)
         db.session.add(user)
 
     topic = Topic(name="Control de Accesos", level=1)
@@ -53,11 +58,12 @@ def _seed_minimal():
     db.session.commit()
 
 
-def login(client, email, password):
-    res = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+def login(client, email, password=None):
+    res = client.post("/api/v1/auth/login",
+                      json={"email": email, "password": password or TEST_PASSWORD})
     assert res.status_code == 200, res.get_json()
     return res.get_json()["access_token"]
 
 
-def auth_header(client, email="guarda@test.co", password="Guarda123*"):
+def auth_header(client, email="guarda@test.co", password=None):
     return {"Authorization": f"Bearer {login(client, email, password)}"}

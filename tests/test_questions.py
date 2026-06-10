@@ -2,7 +2,7 @@ from .conftest import auth_header
 
 
 def _admin(client):
-    return auth_header(client, "admin@test.co", "Admin123*")
+    return auth_header(client, "admin@test.co")
 
 
 def _payload(**overrides):

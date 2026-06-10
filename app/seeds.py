@@ -4,6 +4,9 @@ de ejemplo (usuarios, temas, banco de preguntas e insignias).
 Las preguntas son contenido de muestra para el MVP; la empresa las
 reemplaza/amplía desde el panel de administración (Función 3).
 """
+import os
+import secrets as pysecrets
+
 import click
 from flask.cli import with_appcontext
 
@@ -11,17 +14,19 @@ from .extensions import db
 from .models import Badge, Choice, Question, Topic, User
 from .services.gamification_service import BADGE_CATALOG
 
+# Sin contraseñas en el código: se toma SEED_DEFAULT_PASSWORD del entorno o
+# se genera una aleatoria que `flask seed` imprime una sola vez.
 USERS = [
     {"email": "admin@seguridaddeoro.co", "full_name": "Administrador Plataforma",
-     "role": "admin", "password": "Admin123*"},
+     "role": "admin"},
     {"email": "supervisor@seguridaddeoro.co", "full_name": "Carlos Méndez",
-     "role": "supervisor", "password": "Super123*"},
+     "role": "supervisor"},
     {"email": "guarda1@seguridaddeoro.co", "full_name": "Andrés Rojas",
-     "role": "guarda", "password": "Guarda123*"},
+     "role": "guarda"},
     {"email": "guarda2@seguridaddeoro.co", "full_name": "Luisa Pardo",
-     "role": "guarda", "password": "Guarda123*"},
+     "role": "guarda"},
     {"email": "guarda3@seguridaddeoro.co", "full_name": "Jorge Quintero",
-     "role": "guarda", "password": "Guarda123*"},
+     "role": "guarda"},
 ]
 
 TOPICS = [
@@ -226,10 +231,12 @@ def run_seed() -> dict:
     created = {"users": 0, "topics": 0, "questions": 0, "badges": 0}
 
     if User.query.count() == 0:
+        password = os.getenv("SEED_DEFAULT_PASSWORD") or pysecrets.token_urlsafe(9)
+        created["password"] = password
         for data in USERS:
             user = User(email=data["email"], full_name=data["full_name"],
                         role=data["role"])
-            user.set_password(data["password"])
+            user.set_password(password)
             db.session.add(user)
             created["users"] += 1
 
@@ -276,4 +283,8 @@ def init_db_command():
 def seed_command():
     """Carga datos de ejemplo (idempotente: solo si la base está vacía)."""
     created = run_seed()
+    password = created.pop("password", None)
     click.echo(f"Seed completado: {created}")
+    if password:
+        click.echo("Contraseña de los usuarios de ejemplo "
+                   f"(guárdala, no se vuelve a mostrar): {password}")

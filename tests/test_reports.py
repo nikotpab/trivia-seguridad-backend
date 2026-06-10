@@ -3,7 +3,7 @@ from .test_game import _answer, _correct_choice, _start
 
 
 def _play_full_game(client, email="guarda@test.co"):
-    headers = auth_header(client, email, "Guarda123*")
+    headers = auth_header(client, email)
     data = _start(client, headers)
     sid = data["session"]["id"]
     while not data.get("finished"):
@@ -13,7 +13,7 @@ def _play_full_game(client, email="guarda@test.co"):
 
 def test_overview(client):
     _play_full_game(client)
-    headers = auth_header(client, "super@test.co", "Super123*")
+    headers = auth_header(client, "super@test.co")
     res = client.get("/api/v1/reports/overview", headers=headers)
     data = res.get_json()
     assert data["sessions_finished"] == 1
@@ -24,7 +24,7 @@ def test_overview(client):
 
 def test_users_report_and_detail(client):
     _play_full_game(client)
-    headers = auth_header(client, "super@test.co", "Super123*")
+    headers = auth_header(client, "super@test.co")
 
     rows = client.get("/api/v1/reports/users", headers=headers).get_json()["items"]
     top = rows[0]
@@ -40,7 +40,7 @@ def test_users_report_and_detail(client):
 
 def test_topics_report(client):
     _play_full_game(client)
-    headers = auth_header(client, "super@test.co", "Super123*")
+    headers = auth_header(client, "super@test.co")
     rows = client.get("/api/v1/reports/topics", headers=headers).get_json()["items"]
     assert rows[0]["answers"] == 6
     assert rows[0]["is_critical"] is False
@@ -48,7 +48,7 @@ def test_topics_report(client):
 
 def test_csv_export(client):
     _play_full_game(client)
-    headers = auth_header(client, "super@test.co", "Super123*")
+    headers = auth_header(client, "super@test.co")
     res = client.get("/api/v1/reports/export/users.csv", headers=headers)
     assert res.status_code == 200
     assert res.mimetype == "text/csv"
