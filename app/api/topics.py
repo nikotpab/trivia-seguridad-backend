@@ -25,10 +25,14 @@ def create_topic():
     name = (data.get("name") or "").strip()
     if not name:
         return jsonify(error="name es obligatorio"), 422
+    try:
+        level = int(data.get("level", 1))
+    except (TypeError, ValueError):
+        return jsonify(error="level debe ser un número entero"), 422
     if Topic.query.filter_by(name=name).first():
         return jsonify(error="Ya existe un tema con ese nombre"), 409
     topic = Topic(name=name, description=data.get("description", ""),
-                  level=int(data.get("level", 1)))
+                  level=level)
     db.session.add(topic)
     db.session.commit()
     return jsonify(topic=topic.to_dict()), 201
@@ -42,11 +46,17 @@ def update_topic(topic_id: int):
         return jsonify(error="Tema no encontrado"), 404
     data = request.get_json(silent=True) or {}
     if "name" in data:
-        topic.name = data["name"].strip()
+        name = str(data["name"] or "").strip()
+        if not name:
+            return jsonify(error="name no puede estar vacío"), 422
+        topic.name = name
     if "description" in data:
         topic.description = data["description"]
     if "level" in data:
-        topic.level = int(data["level"])
+        try:
+            topic.level = int(data["level"])
+        except (TypeError, ValueError):
+            return jsonify(error="level debe ser un número entero"), 422
     if "is_active" in data:
         topic.is_active = bool(data["is_active"])
     db.session.commit()

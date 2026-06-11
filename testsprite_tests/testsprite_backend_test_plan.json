@@ -1,0 +1,277 @@
+[
+  {
+    "id": "TC001",
+    "title": "Health check returns service status",
+    "description": "GET /api/v1/health must return HTTP 200 with JSON { status: 'ok', service: 'trivia-seguridad-api' }. No authentication required."
+  },
+  {
+    "id": "TC002",
+    "title": "Login succeeds with valid local credentials",
+    "description": "POST /api/v1/auth/login with { email: 'admin@seguridaddeoro.co', password: 'Password123!' } must return HTTP 200 with a non-empty string access_token and a user object containing id and email == admin@seguridaddeoro.co."
+  },
+  {
+    "id": "TC003",
+    "title": "Login fails with wrong password",
+    "description": "POST /api/v1/auth/login with email 'admin@seguridaddeoro.co' and an incorrect password must return HTTP 401 with an error message (Credenciales inválidas)."
+  },
+  {
+    "id": "TC004",
+    "title": "Login fails with unknown email",
+    "description": "POST /api/v1/auth/login with email 'noexiste@seguridaddeoro.co' and any password must return HTTP 401."
+  },
+  {
+    "id": "TC005",
+    "title": "Login fails with missing fields",
+    "description": "POST /api/v1/auth/login with an empty body (no email/password) must return HTTP 422 with error 'email y password son obligatorios'."
+  },
+  {
+    "id": "TC006",
+    "title": "Get current user profile with valid token",
+    "description": "After logging in as admin@seguridaddeoro.co / Password123! and obtaining access_token, GET /api/v1/auth/me with header Authorization: Bearer <token> must return HTTP 200 with a user object whose email is admin@seguridaddeoro.co."
+  },
+  {
+    "id": "TC007",
+    "title": "Get current user profile without token is rejected",
+    "description": "GET /api/v1/auth/me with no Authorization header must return HTTP 401 with error 'Falta el token de autorización'."
+  },
+  {
+    "id": "TC008",
+    "title": "Get current user profile with invalid token is rejected",
+    "description": "GET /api/v1/auth/me with header Authorization: Bearer not-a-real-token must return HTTP 401 with error 'Token inválido'."
+  },
+  {
+    "id": "TC009",
+    "title": "Admin can list users with pagination",
+    "description": "Logged in as admin, GET /api/v1/users must return HTTP 200 with fields items (array), total, page, pages. items length should be > 0 (seed creates 5 users)."
+  },
+  {
+    "id": "TC010",
+    "title": "Non-admin cannot list users (RBAC 403)",
+    "description": "Log in as guarda1@seguridaddeoro.co / Password123!, then GET /api/v1/users with that Bearer token must return HTTP 403 with error 'No tienes permisos para esta operación'."
+  },
+  {
+    "id": "TC011",
+    "title": "Admin can create a new user",
+    "description": "Logged in as admin, POST /api/v1/users with a unique email (e.g. 'qa.user.<timestamp>@seguridaddeoro.co'), full_name 'QA User', role 'guarda', password 'Password123!' must return HTTP 201 with a user object containing the created email and role 'guarda'."
+  },
+  {
+    "id": "TC012",
+    "title": "Creating a user with duplicate email is rejected",
+    "description": "Logged in as admin, POST /api/v1/users using email 'admin@seguridaddeoro.co' (already exists) with full_name 'Dup' must return HTTP 409 with error 'Ya existe un usuario con ese email'."
+  },
+  {
+    "id": "TC013",
+    "title": "Creating a user with invalid role is rejected",
+    "description": "Logged in as admin, POST /api/v1/users with a unique email, full_name 'Bad Role', role 'superuser' (invalid) must return HTTP 422 with an error mentioning Rol inválido."
+  },
+  {
+    "id": "TC014",
+    "title": "Creating a user with missing required fields is rejected",
+    "description": "Logged in as admin, POST /api/v1/users with body { role: 'guarda' } (missing email and full_name) must return HTTP 422 with error 'email y full_name son obligatorios'."
+  },
+  {
+    "id": "TC015",
+    "title": "Admin can fetch a single user by id",
+    "description": "Logged in as admin, GET /api/v1/users/1 must return HTTP 200 with a user object containing id == 1."
+  },
+  {
+    "id": "TC016",
+    "title": "Fetching a non-existent user returns 404",
+    "description": "Logged in as admin, GET /api/v1/users/999999 must return HTTP 404 with error 'Usuario no encontrado'."
+  },
+  {
+    "id": "TC017",
+    "title": "Admin can update a user",
+    "description": "Logged in as admin, first create a fresh user (unique email) via POST /api/v1/users, then PATCH /api/v1/users/<new_id> with { full_name: 'Nombre Actualizado' } must return HTTP 200 and the user's full_name must equal 'Nombre Actualizado'."
+  },
+  {
+    "id": "TC018",
+    "title": "Admin can logically deactivate a user",
+    "description": "Logged in as admin, create a fresh user via POST /api/v1/users, then DELETE /api/v1/users/<new_id> must return HTTP 200 with message 'Usuario desactivado' and the returned user is_active == false."
+  },
+  {
+    "id": "TC019",
+    "title": "Admin cannot deactivate their own account",
+    "description": "Logged in as admin (whose id is in the login response user.id), DELETE /api/v1/users/<own_id> must return HTTP 422 with error 'No puedes desactivar tu propia cuenta'."
+  },
+  {
+    "id": "TC020",
+    "title": "Authenticated user can list topics",
+    "description": "Logged in as guarda1@seguridaddeoro.co / Password123!, GET /api/v1/topics must return HTTP 200 with field items as an array of length > 0 (seed creates 5 topics)."
+  },
+  {
+    "id": "TC021",
+    "title": "Admin can create a topic",
+    "description": "Logged in as admin, POST /api/v1/topics with a unique name (e.g. 'Tema QA <timestamp>'), description 'desc', level 1 must return HTTP 201 with a topic object containing the created name."
+  },
+  {
+    "id": "TC022",
+    "title": "Non-admin cannot create a topic (RBAC 403)",
+    "description": "Logged in as guarda1@seguridaddeoro.co, POST /api/v1/topics with name 'Tema Prohibido' must return HTTP 403."
+  },
+  {
+    "id": "TC023",
+    "title": "Creating a topic with duplicate name is rejected",
+    "description": "Logged in as admin, create a topic with a unique name, then POST /api/v1/topics again with the same name must return HTTP 409 with error 'Ya existe un tema con ese nombre'."
+  },
+  {
+    "id": "TC024",
+    "title": "Creating a topic without name is rejected",
+    "description": "Logged in as admin, POST /api/v1/topics with body { description: 'x' } (no name) must return HTTP 422 with error 'name es obligatorio'."
+  },
+  {
+    "id": "TC025",
+    "title": "Admin can update a topic",
+    "description": "Logged in as admin, create a topic, then PATCH /api/v1/topics/<id> with { description: 'actualizado' } must return HTTP 200 and reflect the new description."
+  },
+  {
+    "id": "TC026",
+    "title": "Admin can list questions",
+    "description": "Logged in as admin, GET /api/v1/questions must return HTTP 200 with items (array), total, page, pages. total should be >= 25 (seed creates 25 questions)."
+  },
+  {
+    "id": "TC027",
+    "title": "Non-admin cannot list questions (RBAC 403)",
+    "description": "Logged in as guarda1@seguridaddeoro.co, GET /api/v1/questions must return HTTP 403."
+  },
+  {
+    "id": "TC028",
+    "title": "Admin can create a valid question",
+    "description": "Logged in as admin, POST /api/v1/questions with topic_id 1, text 'Pregunta QA?', difficulty 'media', and choices = array of exactly 4 objects each with text, exactly one having is_correct=true. Must return HTTP 201 with a question object."
+  },
+  {
+    "id": "TC029",
+    "title": "Creating a question with wrong number of choices is rejected",
+    "description": "Logged in as admin, POST /api/v1/questions with topic_id 1, text 'Q', difficulty 'media' and only 3 choices must return HTTP 422 with error 'Se requieren exactamente 4 opciones'."
+  },
+  {
+    "id": "TC030",
+    "title": "Creating a question without exactly one correct choice is rejected",
+    "description": "Logged in as admin, POST /api/v1/questions with topic_id 1, text 'Q', difficulty 'media' and 4 choices where none (or more than one) has is_correct=true must return HTTP 422 with error 'Debe haber exactamente una opción correcta'."
+  },
+  {
+    "id": "TC031",
+    "title": "Creating a question with non-existent topic is rejected",
+    "description": "Logged in as admin, POST /api/v1/questions with topic_id 999999, text 'Q', difficulty 'media' and 4 valid choices (one correct) must return HTTP 422 with error 'topic_id no existe'."
+  },
+  {
+    "id": "TC032",
+    "title": "Admin can bulk import questions atomically",
+    "description": "Logged in as admin, POST /api/v1/questions/import with body { items: [<two valid question payloads each with topic_id 1, text, difficulty 'media', 4 choices one correct>] } must return HTTP 201 with { created: 2 }."
+  },
+  {
+    "id": "TC033",
+    "title": "Bulk import with empty items is rejected",
+    "description": "Logged in as admin, POST /api/v1/questions/import with body { items: [] } must return HTTP 422 with error 'items vacío'."
+  },
+  {
+    "id": "TC034",
+    "title": "Fetching a non-existent question returns 404",
+    "description": "Logged in as admin, GET /api/v1/questions/999999 must return HTTP 404 with error 'Pregunta no encontrada'."
+  },
+  {
+    "id": "TC035",
+    "title": "Admin can logically deactivate a question",
+    "description": "Logged in as admin, create a question via POST /api/v1/questions, then DELETE /api/v1/questions/<id> must return HTTP 200 with message 'Pregunta desactivada'."
+  },
+  {
+    "id": "TC036",
+    "title": "User can start a game session",
+    "description": "IMPORTANT for isolation: the backend allows only one active session per user (starting a second returns 409). So this test must use a brand-new dedicated user. Steps: (1) log in as admin@seguridaddeoro.co / Password123! and create a fresh guarda user via POST /api/v1/users with a unique email like 'g.tc036.<timestamp>@seguridaddeoro.co', full_name 'TC036', role 'guarda', password 'Password123!'; (2) log in as that new user to get its token; (3) POST /api/v1/game/sessions with { topic_id: 1, num_questions: 5 } using the new user's token must return HTTP 201. The response JSON has TWO top-level keys: 'session' (with id, status 'active', total_questions) and 'question' (the current question, NOT nested under session). Assert response['session']['id'] exists and response['question'] is present with an 'id' and a non-empty 'choices' array."
+  },
+  {
+    "id": "TC037",
+    "title": "Starting a session without topic_id is rejected",
+    "description": "Create a fresh guarda user (admin creates POST /api/v1/users with unique email 'g.tc037.<timestamp>@seguridaddeoro.co', password 'Password123!') and log in as that user. Then POST /api/v1/game/sessions with empty body must return HTTP 422 with error 'topic_id es obligatorio'."
+  },
+  {
+    "id": "TC038",
+    "title": "User can fetch their own session state",
+    "description": "Create a fresh guarda user (unique email 'g.tc038.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session: POST /api/v1/game/sessions with { topic_id: 1, num_questions: 5 } returns 201. The session id is at response['session']['id'] (NOT a top-level 'session_id' or 'id' key). Capture session_id = response['session']['id'], then GET /api/v1/game/sessions/<session_id> with that user's token must return HTTP 200 with a body containing a 'session' object whose id equals session_id."
+  },
+  {
+    "id": "TC039",
+    "title": "User cannot access another user's session (access isolation, 404)",
+    "description": "Create TWO fresh guarda users via admin (unique emails 'g.tc039a.<timestamp>@seguridaddeoro.co' and 'g.tc039b.<timestamp>@seguridaddeoro.co', both password 'Password123!'). Log in as user A, start a session (topic_id 1) and capture response['session']['id']. Then log in as user B and GET /api/v1/game/sessions/<session_id> with B's token. By design the backend returns HTTP 404 (error 'Partida no encontrada') for a session owned by another user, so as not to leak its existence. Assert the status code is 404."
+  },
+  {
+    "id": "TC040",
+    "title": "User can submit an answer in a session",
+    "description": "Create a fresh guarda user (unique email 'g.tc040.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session: POST /api/v1/game/sessions with { topic_id: 1, num_questions: 5 }. From the 201 response, read session_id = response['session']['id'] and pick choice_id = response['question']['choices'][0]['id']. Then POST /api/v1/game/sessions/<session_id>/answer with { choice_id: <that id> } must return HTTP 200 with a JSON body containing the key 'result' (which includes 'is_correct' and 'points_awarded')."
+  },
+  {
+    "id": "TC041",
+    "title": "Answering without choice_id is rejected",
+    "description": "Create a fresh guarda user (unique email 'g.tc041.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session (topic_id 1), then POST /api/v1/game/sessions/<session_id>/answer with empty body must return HTTP 422 with error 'choice_id es obligatorio'."
+  },
+  {
+    "id": "TC042",
+    "title": "User can use a lifeline",
+    "description": "Create a fresh guarda user (unique email 'g.tc042.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session (topic_id 1), then POST /api/v1/game/sessions/<session_id>/lifeline with { type: 'fifty_fifty' } must return HTTP 200 with updated state."
+  },
+  {
+    "id": "TC043",
+    "title": "Using a lifeline without type is rejected",
+    "description": "Create a fresh guarda user (unique email 'g.tc043.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session (topic_id 1), then POST /api/v1/game/sessions/<session_id>/lifeline with empty body must return HTTP 422 with an error mentioning 'type es obligatorio'."
+  },
+  {
+    "id": "TC044",
+    "title": "User can abandon a session",
+    "description": "Create a fresh guarda user (unique email 'g.tc044.<timestamp>@seguridaddeoro.co', password 'Password123!') via admin and log in as it. Start a session (topic_id 1), then POST /api/v1/game/sessions/<session_id>/abandon must return HTTP 200 with the final state."
+  },
+  {
+    "id": "TC045",
+    "title": "Authenticated user can get ranks",
+    "description": "Logged in as guarda1, GET /api/v1/ranks must return HTTP 200 with fields ranks and me."
+  },
+  {
+    "id": "TC046",
+    "title": "Authenticated user can get badges catalog",
+    "description": "Logged in as guarda1, GET /api/v1/badges must return HTTP 200 with items as an array (seed creates 6 badges); each item should include an 'unlocked' boolean."
+  },
+  {
+    "id": "TC047",
+    "title": "Leaderboard returns results for period=all",
+    "description": "Logged in as guarda1, GET /api/v1/leaderboard?period=all must return HTTP 200 with items (array) and period == 'all'."
+  },
+  {
+    "id": "TC048",
+    "title": "Leaderboard returns results for period=week",
+    "description": "Logged in as guarda1, GET /api/v1/leaderboard?period=week must return HTTP 200 with items (array) and period == 'week'."
+  },
+  {
+    "id": "TC049",
+    "title": "Leaderboard rejects invalid period",
+    "description": "Logged in as guarda1, GET /api/v1/leaderboard?period=year must return HTTP 422 with error 'period inválido: all | month | week'."
+  },
+  {
+    "id": "TC050",
+    "title": "Supervisor can get reports overview",
+    "description": "Log in as supervisor@seguridaddeoro.co / Password123!, GET /api/v1/reports/overview must return HTTP 200 with an aggregate overview object."
+  },
+  {
+    "id": "TC051",
+    "title": "Guarda cannot access supervisor reports (RBAC 403)",
+    "description": "Logged in as guarda1@seguridaddeoro.co, GET /api/v1/reports/overview must return HTTP 403."
+  },
+  {
+    "id": "TC052",
+    "title": "Supervisor can get per-user report",
+    "description": "Logged in as supervisor, GET /api/v1/reports/users must return HTTP 200 with field items as an array."
+  },
+  {
+    "id": "TC053",
+    "title": "Supervisor user-detail for non-existent user returns 404",
+    "description": "Logged in as supervisor, GET /api/v1/reports/users/999999 must return HTTP 404 with error 'Usuario no encontrado'."
+  },
+  {
+    "id": "TC054",
+    "title": "Supervisor can get per-topic report",
+    "description": "Logged in as supervisor, GET /api/v1/reports/topics must return HTTP 200 with field items as an array."
+  },
+  {
+    "id": "TC055",
+    "title": "Supervisor can export users report as CSV",
+    "description": "Logged in as supervisor, GET /api/v1/reports/export/users.csv must return HTTP 200 with Content-Type text/csv and a Content-Disposition attachment header (filename reporte_guardas.csv)."
+  }
+]

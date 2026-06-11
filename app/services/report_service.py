@@ -10,6 +10,18 @@ from .gamification_service import rank_info
 CRITICAL_ACCURACY = 0.60   # tema crítico: precisión < 60%
 CRITICAL_MIN_ATTEMPTS = 10
 
+# Caracteres que disparan fórmulas al abrir el CSV en Excel/LibreOffice
+_CSV_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_safe(value) -> str:
+    """Neutraliza la inyección de fórmulas (CWE-1236) en celdas con texto
+    controlado por el usuario (nombre, email)."""
+    text = "" if value is None else str(value)
+    if text and text[0] in _CSV_FORMULA_PREFIXES:
+        return "'" + text
+    return text
+
 
 def _accuracy_query(filters: list):
     """(total respondidas, correctas) excluyendo preguntas saltadas."""
@@ -111,9 +123,9 @@ def users_csv() -> str:
                      "partidas", "respuestas", "precision", "ultima_actividad"])
     for row in users_report():
         writer.writerow([
-            row["id"], row["full_name"], row["email"],
+            row["id"], _csv_safe(row["full_name"]), _csv_safe(row["email"]),
             "si" if row["is_active"] else "no",
-            row["total_points"], row["rank"], row["sessions_finished"],
+            row["total_points"], _csv_safe(row["rank"]), row["sessions_finished"],
             row["answers"],
             f"{row['accuracy']:.2%}" if row["accuracy"] is not None else "",
             row["last_activity_at"] or "",

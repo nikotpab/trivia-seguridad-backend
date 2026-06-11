@@ -21,8 +21,11 @@ def start_session():
     if not topic_id:
         return jsonify(error="topic_id es obligatorio"), 422
     cfg = current_app.config
-    num = min(int(data.get("num_questions", cfg["GAME_DEFAULT_QUESTIONS"])),
-              cfg["GAME_MAX_QUESTIONS"])
+    try:
+        requested = int(data.get("num_questions", cfg["GAME_DEFAULT_QUESTIONS"]))
+    except (TypeError, ValueError):
+        return jsonify(error="num_questions debe ser un número entero"), 422
+    num = min(requested, cfg["GAME_MAX_QUESTIONS"])
     payload = game_service.start_session(g.current_user, topic_id, max(num, 1))
     return jsonify(payload), 201
 

@@ -8,12 +8,15 @@ from flask import Blueprint, current_app, g, jsonify, request
 
 from ..auth.decorators import require_auth
 from ..auth.tokens import issue_local_token
+from ..extensions import limiter
 from ..models import User
+from ..security_log import log_event
 
 bp = Blueprint("auth", __name__)
 
 
 @bp.post("/login")
+@limiter.limit(lambda: current_app.config["LOGIN_RATE_LIMIT"])
 def login():
     if current_app.config["AUTH_MODE"] != "local":
         return jsonify(error="El login se realiza contra AWS Cognito "
@@ -27,8 +30,10 @@ def login():
 
     user = User.query.filter_by(email=email).first()
     if not user or not user.check_password(password) or not user.is_active:
+        log_event("login_failed", email=email)
         return jsonify(error="Credenciales inválidas"), 401
 
+    log_event("login_success", user_id=user.id, role=user.role)
     return jsonify(access_token=issue_local_token(user),
                    user=user.to_dict(include_stats=True))
 

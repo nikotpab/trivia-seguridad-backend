@@ -3,12 +3,13 @@
 Cada pregunta tiene 4 opciones y exactamente una correcta.
 Incluye carga masiva (POST /questions/import) para migrar contenido.
 """
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 from ..auth.decorators import require_auth
 from ..extensions import db
 from ..models import Choice, Question, Topic
 from ..models.question import DIFFICULTY_POINTS
+from ..security_log import log_event
 
 bp = Blueprint("questions", __name__)
 
@@ -93,6 +94,7 @@ def import_questions():
     questions = [_build_question(d) for d in items]
     db.session.add_all(questions)
     db.session.commit()
+    log_event("questions_imported", actor=g.current_user.id, count=len(questions))
     return jsonify(created=len(questions)), 201
 
 
@@ -114,7 +116,10 @@ def update_question(question_id: int):
 
     data = request.get_json(silent=True) or {}
     if "text" in data:
-        question.text = data["text"].strip()
+        text = str(data["text"] or "").strip()
+        if not text:
+            return jsonify(error="text no puede estar vacío"), 422
+        question.text = text
     if "difficulty" in data:
         if data["difficulty"] not in DIFFICULTIES:
             return jsonify(error=f"difficulty inválida. Opciones: {', '.join(DIFFICULTIES)}"), 422
