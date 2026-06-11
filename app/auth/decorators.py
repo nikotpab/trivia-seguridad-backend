@@ -12,6 +12,7 @@ from flask import g, jsonify, request
 
 from ..extensions import db
 from ..models.user import ROLE_ORDER
+from ..security_log import log_event
 from .tokens import AuthError, verify_token
 
 
@@ -28,6 +29,8 @@ def require_auth(minimum_role: str = "guarda"):
                 return jsonify(error=exc.message), exc.status
 
             if ROLE_ORDER[user.role] < ROLE_ORDER[minimum_role]:
+                log_event("authz_denied", user_id=user.id, role=user.role,
+                          required=minimum_role, path=request.path)
                 return jsonify(error="No tienes permisos para esta operación"), 403
 
             user.last_activity_at = datetime.now(timezone.utc)

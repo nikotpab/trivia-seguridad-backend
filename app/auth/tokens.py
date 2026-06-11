@@ -81,8 +81,12 @@ def _verify_cognito(token: str) -> User:
         raise AuthError("Token inválido")
 
     client_id = cfg["COGNITO_APP_CLIENT_ID"]
+    if not client_id:
+        # Sin client_id no se puede validar la audiencia: se aceptaría
+        # cualquier token del User Pool (incluido el de otra app). Falla cerrado.
+        raise AuthError("COGNITO_APP_CLIENT_ID no configurado", 500)
     token_client = payload.get("client_id") or payload.get("aud")
-    if client_id and token_client != client_id:
+    if token_client != client_id:
         raise AuthError("Token no corresponde a esta aplicación")
 
     return _provision_cognito_user(payload)
